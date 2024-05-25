@@ -1,0 +1,11 @@
+global using System.Net;
+global using System.Net.Http.Headers;
+global using System.Text.Json;
+global using API.Helpers;
+global using Application.DTOs;
+global using Application.Interfaces;
+global using Domain.Exceptions;
+global using Infrastructure;
+global using Mapster;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.OpenApi.Models;
