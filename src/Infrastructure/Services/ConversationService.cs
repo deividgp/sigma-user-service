@@ -6,11 +6,9 @@ public class ConversationService(IRepository<Conversation, Guid> conversationRep
     private readonly IRepository<Conversation, Guid> _conversationRepository =
         conversationRepository;
 
-    public async Task<Conversation?> GetConversation(ConversationDTO conversation)
+    public async Task<Conversation?> GetConversation(Guid conversationId)
     {
-        return await _conversationRepository.GetSingleAsync(c =>
-            c.UserIds.Contains(conversation.UserId1) && c.UserIds.Contains(conversation.UserId2)
-        );
+        return await _conversationRepository.GetByIdAsync(conversationId);
     }
 
     public async Task<Message> AddMessage(MessageCreateDTO messageCreate)
@@ -18,6 +16,7 @@ public class ConversationService(IRepository<Conversation, Guid> conversationRep
         Message message =
             new()
             {
+                Id = Guid.NewGuid(),
                 SenderId = messageCreate.SenderId,
                 Content = messageCreate.Content,
                 Timestamp = DateTime.Now

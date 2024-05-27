@@ -1,8 +1,12 @@
 namespace Infrastructure.Services;
 
-public class TokenService(IConfiguration config, IHttpContextAccessor httpContextAccessor)
-    : ITokenService
+public class TokenService(
+    IConfiguration config,
+    IHttpContextAccessor httpContextAccessor,
+    JwtSettings jwtSettings
+) : ITokenService
 {
+    private readonly JwtSettings _jwtSettings = jwtSettings;
     private readonly IConfiguration _config = config;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -38,9 +42,7 @@ public class TokenService(IConfiguration config, IHttpContextAccessor httpContex
             return null;
 
         JwtSecurityTokenHandler tokenHandler = new();
-        byte[] key = Encoding.ASCII.GetBytes(
-            _config.GetValue<string>("JwtSettings:AccessTokenSecret") ?? ""
-        );
+        byte[] key = Encoding.ASCII.GetBytes(_jwtSettings.AccessTokenSecret);
 
         try
         {
@@ -51,9 +53,9 @@ public class TokenService(IConfiguration config, IHttpContextAccessor httpContex
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = _config.GetValue<string>("JwtSettings:Issuer"),
+                    ValidIssuer = _jwtSettings.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = _config.GetValue<string>("JwtSettings:Audience"),
+                    ValidAudience = _jwtSettings.Audience,
                     ClockSkew = TimeSpan.Zero
                 },
                 out SecurityToken validatedToken

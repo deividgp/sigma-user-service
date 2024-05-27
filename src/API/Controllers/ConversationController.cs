@@ -1,24 +1,20 @@
 namespace API.Controllers;
 
 [ApiController]
-public class ConversationController(
-    IConversationService conversationService,
-    ITokenService tokenService
-) : ControllerBase
+public class ConversationController(IConversationService conversationService) : ControllerBase
 {
     private readonly IConversationService _conversationService = conversationService;
-    private readonly ITokenService _tokenService = tokenService;
 
     [HttpGet("/api/Conversation/Get")]
-    public async Task<ActionResult> GetConversation(string userId)
+    public async Task<ActionResult> GetConversation(string conversationId)
     {
-        ConversationDTO conversation =
-            new()
-            {
-                UserId1 = Guid.Parse(_tokenService.GetClaim("sid")!),
-                UserId2 = Guid.Parse(userId)
-            };
+        Conversation? conversation = await _conversationService.GetConversation(
+            Guid.Parse(conversationId)
+        );
 
-        return Ok(await _conversationService.GetConversation(conversation));
+        if (conversation == null)
+            return NotFound();
+
+        return Ok(conversation);
     }
 }

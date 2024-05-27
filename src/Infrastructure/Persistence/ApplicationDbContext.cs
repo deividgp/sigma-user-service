@@ -16,7 +16,7 @@ public class ApplicationDbContext
         List<CreateIndexModel<User>> indexModelList =
         [
             new(Builders<User>.IndexKeys.Ascending(user => user.Username), indexOptions),
-            new(Builders<User>.IndexKeys.Ascending(user => user.Email), indexOptions)
+            new(Builders<User>.IndexKeys.Ascending(user => user.Email), indexOptions),
         ];
 
         userCollection.Indexes.CreateMany(indexModelList);

@@ -23,6 +23,10 @@ public class UserController(IUserService userService, ITokenService tokenService
     [HttpGet("/api/User/Get")]
     public async Task<ActionResult> GetUser()
     {
-        return Ok(await _userService.GetUser(Guid.Parse(_tokenService.GetClaim("sid")!)));
+        User? user = await _userService.GetUser(Guid.Parse(_tokenService.GetClaim("sid")!));
+
+        if (user == null) return NotFound();
+
+        return Ok(user);
     }
 }

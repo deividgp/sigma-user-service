@@ -15,7 +15,12 @@ public class UserService(
         return await _userRepository.GetByIdAsync(userId);
     }
 
-    public async Task AddContact(PartialUserCreateDTO contactCreate)
+    public async Task<User?> GetUser(string username)
+    {
+        return await _userRepository.GetFirstAsync(u => u.Username == username);
+    }
+
+    public async Task<(ContactUser, ContactUser)> AddContact(PartialUserCreateDTO contactCreate)
     {
         Conversation conversation = await _conversationService.CreateConversation(
             new ConversationDTO()
@@ -50,6 +55,8 @@ public class UserService(
             u => u.Id == targetUser.Id,
             Builders<User>.Update.Push(u => u.Contacts, user)
         );
+
+        return (user, targetUser);
     }
 
     public Task RemoveContact(PartialUserRemoveDTO contactRemove)
@@ -97,13 +104,13 @@ public class UserService(
         await _userRepository.UpdateOneAsync(
             u => u.Id == pendingRemove.UserId,
             Builders<User>.Update.PullFilter(
-                u => u.Contacts,
+                u => u.Pending,
                 f => f.Id == pendingRemove.TargetUserId
             )
         );
     }
 
-    public async Task AcceptPending(PartialUserCreateDTO pendingAccept)
+    public async Task<(ContactUser, ContactUser)> AcceptPending(PartialUserCreateDTO pendingAccept)
     {
         await RemovePending(
             new PartialUserRemoveDTO()
@@ -112,7 +119,8 @@ public class UserService(
                 TargetUserId = pendingAccept.TargetUserId,
             }
         );
-        await AddContact(pendingAccept);
+
+        return await AddContact(pendingAccept);
     }
 
     public Task BlockUser(PartialUserCreateDTO blockCreate)
