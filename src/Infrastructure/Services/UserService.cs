@@ -77,11 +77,6 @@ public class UserService(
         return Task.FromResult(true);
     }
 
-    public Task AddServer(Guid userId, Guid serverId)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<User> CreateUser(UserCreateDTO userCreate)
     {
         User user = _mapper.Map<User>(userCreate);
@@ -131,5 +126,33 @@ public class UserService(
     public Task UnblockUser(PartialUserRemoveDTO blockRemove)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<PartialServer> AddServer(ServerCreateDTO serverCreate)
+    {
+        PartialServer partialServer =
+            new()
+            {
+                Id = serverCreate.ServerId,
+                Name = serverCreate.ServerName,
+                Icon = serverCreate.Icon
+            };
+
+        await _userRepository.UpdateOneAsync(
+            u => u.Id == serverCreate.UserId,
+            Builders<User>.Update.Push(u => u.Servers, partialServer)
+        );
+
+        return partialServer;
+    }
+
+    public async Task<Guid> RemoveServer(ServerRemoveDTO serverRemove)
+    {
+        await _userRepository.UpdateOneAsync(
+            u => u.Id == serverRemove.UserId,
+            Builders<User>.Update.PullFilter(u => u.Servers, s => s.Id == serverRemove.ServerId)
+        );
+
+        return serverRemove.ServerId;
     }
 }

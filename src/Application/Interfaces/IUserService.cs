@@ -12,5 +12,6 @@ public interface IUserService
     public Task<(ContactUser, ContactUser)> AcceptPending(PartialUserCreateDTO pendingAccept);
     public Task BlockUser(PartialUserCreateDTO blockCreate);
     public Task UnblockUser(PartialUserRemoveDTO blockRemove);
-    public Task AddServer(Guid userId, Guid serverId);
+    public Task<PartialServer> AddServer(ServerCreateDTO serverCreate);
+    public Task<Guid> RemoveServer(ServerRemoveDTO serverRemove);
 }

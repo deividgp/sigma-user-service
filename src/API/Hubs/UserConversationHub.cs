@@ -99,6 +99,34 @@ public class UserConversationHub(IUserService userService, IConversationService 
         }
     }
 
+    public async Task<bool> SendJoinServer(ServerCreateDTO serverCreate)
+    {
+        try
+        {
+            PartialServer partialServer = await _userService.AddServer(serverCreate);
+            await Clients.Caller.SendAsync("ReceiveJoinServer", partialServer);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> SendLeaveServer(ServerRemoveDTO serverRemove)
+    {
+        try
+        {
+            await _userService.RemoveServer(serverRemove);
+            await Clients.Caller.SendAsync("ReceiveLeaveServer", serverRemove.ServerId);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     // Conversation
     public async Task JoinConversation(string conversationId)
     {
