@@ -25,8 +25,33 @@ public class UserController(IUserService userService, ITokenService tokenService
     {
         User? user = await _userService.GetUser(Guid.Parse(_tokenService.GetClaim("sid")!));
 
-        if (user == null) return NotFound();
+        if (user == null)
+            return NotFound();
 
         return Ok(user);
+    }
+
+    [HttpPatch("/api/User/RemoveFromServer")]
+    public async Task<ActionResult> RemoveFromServer(ServerRemoveRequestDTO serverRemoveRequest)
+    {
+        try
+        {
+            foreach (Guid userId in serverRemoveRequest.UserIds)
+            {
+                await _userService.RemoveServer(
+                    new ServerRemoveDTO()
+                    {
+                        UserId = userId,
+                        ServerId = serverRemoveRequest.ServerId
+                    }
+                );
+            }
+
+            return Ok();
+        }
+        catch
+        {
+            return StatusCode(500);
+        }
     }
 }
