@@ -5,4 +5,5 @@ public interface IConversationService
     public Task<Conversation?> GetConversation(Guid conversationId);
     public Task<Message> AddMessage(MessageCreateDTO messageCreate);
     public Task<Conversation> CreateConversation(ConversationDTO conversation);
+    public Task<List<Message>?> GetMessages(MessageGetRequestDTO messageGetRequest);
 }

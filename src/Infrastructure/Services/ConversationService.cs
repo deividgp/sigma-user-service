@@ -42,4 +42,23 @@ public class ConversationService(IRepository<Conversation, Guid> conversationRep
 
         return conversation;
     }
+
+    public async Task<List<Message>?> GetMessages(MessageGetRequestDTO messageGetRequest)
+    {
+        Conversation? conversation = await _conversationRepository.GetByIdAsync(
+            messageGetRequest.ConversationId
+        );
+
+        if (conversation is null)
+            return null;
+
+        return conversation
+            .Messages.Where(m =>
+                m.Content.Contains(
+                    messageGetRequest.Search,
+                    StringComparison.CurrentCultureIgnoreCase
+                )
+            )
+            .ToList();
+    }
 }
