@@ -17,7 +17,7 @@ public class ConversationService(IRepository<Conversation, Guid> conversationRep
             new()
             {
                 Id = Guid.NewGuid(),
-                SenderId = messageCreate.SenderId,
+                Sender = messageCreate.Sender,
                 Content = messageCreate.Content,
                 Timestamp = DateTime.Now
             };

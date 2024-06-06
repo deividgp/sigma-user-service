@@ -5,7 +5,7 @@ public class ConversationController(IConversationService conversationService) : 
 {
     private readonly IConversationService _conversationService = conversationService;
 
-    [HttpGet("/api/Conversation/Get")]
+    [HttpGet("/api/Conversation/Get/{conversationId}")]
     public async Task<ActionResult> GetConversation(string conversationId)
     {
         Conversation? conversation = await _conversationService.GetConversation(
