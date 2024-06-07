@@ -54,4 +54,18 @@ public class UserController(IUserService userService, ITokenService tokenService
             return StatusCode(500);
         }
     }
+
+    [HttpPatch("/api/User/UpdatePushToken")]
+    public async Task<ActionResult> UpdatePushToken(PushTokenUpdateDTO pushTokenUpdate)
+    {
+        bool result = await _userService.UpdatePushToken(new PushTokenUpdateDTO() {
+            PushToken = pushTokenUpdate.PushToken,
+            UserId = Guid.Parse(_tokenService.GetClaim("sid")!)
+        });
+
+        if (!result)
+            return NotFound();
+
+        return Ok();
+    }
 }

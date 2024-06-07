@@ -155,4 +155,17 @@ public class UserService(
 
         return serverRemove.ServerId;
     }
+
+    public async Task<bool> UpdatePushToken(PushTokenUpdateDTO pushTokenUpdate)
+    {
+        try
+        {
+            await _userRepository.UpdateOneAsync(u => u.Id == pushTokenUpdate.UserId, Builders<User>.Update.Set(u => u.PushToken, pushTokenUpdate.PushToken));
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

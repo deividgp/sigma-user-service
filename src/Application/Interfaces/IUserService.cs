@@ -14,4 +14,5 @@ public interface IUserService
     public Task UnblockUser(PartialUserRemoveDTO blockRemove);
     public Task<PartialServer> AddServer(ServerCreateDTO serverCreate);
     public Task<Guid> RemoveServer(ServerRemoveDTO serverRemove);
+    public Task<bool> UpdatePushToken(PushTokenUpdateDTO pushTokenUpdate);
 }

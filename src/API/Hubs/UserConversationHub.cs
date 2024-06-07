@@ -5,6 +5,7 @@ public class UserConversationHub(IUserService userService, IConversationService 
 {
     private readonly IUserService _userService = userService;
     private readonly IConversationService _conversationService = conversationService;
+    private readonly PushApiClient _pushApiClient = new();
 
     // User
     public async Task<bool> SendContactRequest(SendContactRequestDTO sendContactRequest)
@@ -144,5 +145,23 @@ public class UserConversationHub(IUserService userService, IConversationService 
         await Clients
             .Group(messageCreate.ConversationId.ToString())
             .SendAsync("ReceiveConversationMessage", message);
+
+        Conversation? conversation = await _conversationService.GetConversation(messageCreate.ConversationId);
+
+        if (conversation is null) return;
+
+        Guid userId = conversation.UserIds.Where(id => id != messageCreate.Sender.Id).SingleOrDefault();
+
+        User? user = await _userService.GetUser(userId);
+
+        if (user is null) return;
+
+        await _pushApiClient.PushSendAsync(new PushTicketRequest()
+        {
+            PushTo = [user.PushToken],
+            PushTitle = "New message from " + messageCreate.Sender.Username,
+            PushBody = messageCreate.Content,
+            PushPriority = "high"
+        });
     }
 }

@@ -10,4 +10,5 @@ public class User : Entity<Guid>
     public List<PartialUser> BlockedUsers { get; set; } = [];
     public List<PartialServer> Servers { get; set; } = [];
     public Settings Settings { get; set; } = new Settings();
+    public string? PushToken { get; set; } = null;
 }
