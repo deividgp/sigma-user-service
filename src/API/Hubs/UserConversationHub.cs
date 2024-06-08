@@ -1,3 +1,5 @@
+using Domain.Entities;
+
 namespace API.Hubs;
 
 public class UserConversationHub(IUserService userService, IConversationService conversationService)
@@ -17,9 +19,9 @@ public class UserConversationHub(IUserService userService, IConversationService 
                 return false;
             }
 
-            User? aux = await _userService.GetUser(sendContactRequest.TargetUsername);
+            User? auxUser = await _userService.GetUser(sendContactRequest.TargetUsername);
 
-            if (aux == null)
+            if (auxUser == null)
             {
                 return false;
             }
@@ -29,14 +31,24 @@ public class UserConversationHub(IUserService userService, IConversationService 
                 {
                     UserId = sendContactRequest.UserId,
                     Username = sendContactRequest.Username,
-                    TargetUserId = aux.Id,
-                    TargetUsername = aux.Username,
+                    TargetUserId = auxUser.Id,
+                    TargetUsername = auxUser.Username,
                 };
 
             await _userService.AddPending(pendingCreate);
             await Clients
                 .User(pendingCreate.TargetUserId.ToString())
                 .SendAsync("ReceiveContactRequest", pendingCreate);
+
+            await _pushApiClient.PushSendAsync(
+                new PushTicketRequest()
+                {
+                    PushTo = [auxUser.PushToken],
+                    PushTitle = "Contact request from " + sendContactRequest.Username,
+                    PushBody = "Accept or reject it",
+                    PushPriority = "high"
+                }
+            );
             return true;
         }
         catch
@@ -146,22 +158,30 @@ public class UserConversationHub(IUserService userService, IConversationService 
             .Group(messageCreate.ConversationId.ToString())
             .SendAsync("ReceiveConversationMessage", message);
 
-        Conversation? conversation = await _conversationService.GetConversation(messageCreate.ConversationId);
+        Conversation? conversation = await _conversationService.GetConversation(
+            messageCreate.ConversationId
+        );
 
-        if (conversation is null) return;
+        if (conversation is null)
+            return;
 
-        Guid userId = conversation.UserIds.Where(id => id != messageCreate.Sender.Id).SingleOrDefault();
+        Guid userId = conversation
+            .UserIds.Where(id => id != messageCreate.Sender.Id)
+            .SingleOrDefault();
 
         User? user = await _userService.GetUser(userId);
 
-        if (user is null) return;
+        if (user is null)
+            return;
 
-        await _pushApiClient.PushSendAsync(new PushTicketRequest()
-        {
-            PushTo = [user.PushToken],
-            PushTitle = "New message from " + messageCreate.Sender.Username,
-            PushBody = messageCreate.Content,
-            PushPriority = "high"
-        });
+        await _pushApiClient.PushSendAsync(
+            new PushTicketRequest()
+            {
+                PushTo = [user.PushToken],
+                PushTitle = "New message from " + messageCreate.Sender.Username,
+                PushBody = messageCreate.Content,
+                PushPriority = "high"
+            }
+        );
     }
 }
