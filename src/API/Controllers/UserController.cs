@@ -25,7 +25,7 @@ public class UserController(IUserService userService, ITokenService tokenService
     {
         User? user = await _userService.GetUser(Guid.Parse(_tokenService.GetClaim("sid")!));
 
-        if (user == null)
+        if (user is null)
             return NotFound();
 
         return Ok(user);
@@ -58,10 +58,13 @@ public class UserController(IUserService userService, ITokenService tokenService
     [HttpPatch("/api/User/UpdatePushToken")]
     public async Task<ActionResult> UpdatePushToken(PushTokenUpdateDTO pushTokenUpdate)
     {
-        bool result = await _userService.UpdatePushToken(new PushTokenUpdateDTO() {
-            PushToken = pushTokenUpdate.PushToken,
-            UserId = Guid.Parse(_tokenService.GetClaim("sid")!)
-        });
+        bool result = await _userService.UpdatePushToken(
+            new PushTokenUpdateDTO()
+            {
+                PushToken = pushTokenUpdate.PushToken,
+                UserId = Guid.Parse(_tokenService.GetClaim("sid")!)
+            }
+        );
 
         if (!result)
             return NotFound();
