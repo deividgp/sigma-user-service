@@ -97,7 +97,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8081");
+        policy.WithOrigins("http://localhost:8081", "https://sigma.app.deividgp.com/");
         policy.WithHeaders("*");
         policy.WithMethods("*");
         policy.AllowCredentials();
