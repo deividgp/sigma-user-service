@@ -1,5 +1,3 @@
-using Domain.Entities;
-
 namespace API.Hubs;
 
 public class UserConversationHub(IUserService userService, IConversationService conversationService)
